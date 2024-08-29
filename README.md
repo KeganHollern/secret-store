@@ -21,3 +21,4 @@ docker run -p 80:80 --env PORT=80 keganhollern/secret-store
 - [ ] finish readme documentation
 - [ ] link docker image
 - [ ] introduce persistence (mongo?)
+- [ ] mobile support with save button banner or something
