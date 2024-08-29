@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Secret</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        #editor {
+            width: 100vw;
+            height: 100vh;
+        }
+    </style>
+    <script src="https://unpkg.com/monaco-editor@latest/min/vs/loader.js"></script>
+</head>
+
+<body>
+    <div id="editor"></div>
+
+    <script>
+        require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@latest/min/vs' } });
+        require(['vs/editor/editor.main'], function () {
+            var editor = monaco.editor.create(document.getElementById('editor'), {
+                value: "Loading secret...",
+                language: 'markdown',
+                theme: 'vs-dark',
+                readOnly: true,
+                automaticLayout: true
+            });
+
+            // Function to query your API and get the encrypted secret
+            async function fetchEncryptedSecret(randomSecretId) {
+                const response = await fetch(`${window.location.origin}/api/secret?secretId=${randomSecretId}`);
+                const encryptedSecret = await response.json();
+                if(encryptedSecret.error !== undefined) {
+                    throw new Error(encryptedSecret.error);
+                }
+                return encryptedSecret; // Replace with your actual API call and response handling
+            }
+
+            // Function to import the AES key from a hexadecimal string
+            async function importAESKey(aesKeyHex) {
+                const rawKey = new Uint8Array(aesKeyHex.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+                return await crypto.subtle.importKey(
+                    "raw",
+                    rawKey,
+                    "AES-GCM",
+                    true,
+                    ["decrypt"]
+                );
+            }
+
+            // Function to decrypt the secret
+            async function decryptSecret(encryptedSecret, aesKey) {
+                const iv = new Uint8Array(atob(encryptedSecret.iv).split("").map(char => char.charCodeAt(0)));
+                const ciphertext = new Uint8Array(atob(encryptedSecret.ciphertext).split("").map(char => char.charCodeAt(0)));
+
+                const decryptedSecret = await crypto.subtle.decrypt(
+                    {
+                        name: "AES-GCM",
+                        iv: iv,
+                    },
+                    aesKey,
+                    ciphertext
+                );
+
+                const decoder = new TextDecoder();
+                return decoder.decode(decryptedSecret);
+            }
+
+            // Main function to load and display the secret
+            async function loadSecret() {
+                const randomSecretId = window.location.pathname.split('/').pop(); // Get the secret ID from the URL path
+                const aesKeyHex = window.location.hash.substring(1); // Get the AES key from the hash
+
+                try {
+                    const encryptedSecret = await fetchEncryptedSecret(randomSecretId);
+                    const aesKey = await importAESKey(aesKeyHex);
+                    const decryptedSecret = await decryptSecret(encryptedSecret, aesKey);
+
+                    // Display the decrypted secret in the Monaco editor
+                    editor.setValue(decryptedSecret);
+                } catch (error) {
+                    console.error('Failed to load or decrypt secret:', error);
+                    editor.setValue("Failed to load or decrypt secret.");
+                }
+            }
+
+            // Load the secret when the page loads
+            loadSecret();
+        });
+    </script>
+</body>
+
+</html>

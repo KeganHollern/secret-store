@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secret Sharing Service</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        #editor {
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #share-link-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #1e1e1e;
+            border: 1px solid #333;
+            color: #d4d4d4;
+            padding: 10px;
+            width: 100%;
+            max-width: 280px;
+            border-radius: 5px;
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            /* Hide overflow */
+            text-overflow: ellipsis;
+            /* Ellipsis for overflow */
+            position: relative;
+            margin: 0 auto 15px auto;
+            transition: background-color 0.3s ease;
+            /* Smooth hover effect */
+        }
+
+        #share-link {
+            flex-grow: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        #share-link-wrapper:hover {
+            background-color: #333;
+            /* Change color on hover */
+        }
+
+        #copy-icon {
+            margin-left: 10px;
+            color: rgba(255, 255, 255, 0.5);
+            /* Subtle color to match the text */
+            font-size: 16px;
+            pointer-events: none;
+            /* Clicks go through the icon */
+            opacity: 0.7;
+            /* Slightly transparent for subtlety */
+            transition: opacity 0.3s ease;
+            /* Smooth transition for hover effect */
+        }
+
+        #share-link-wrapper:hover #copy-icon {
+            opacity: 1;
+            /* Fully opaque when hovering over the link area */
+        }
+
+        #popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #252526;
+            color: #d4d4d4;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            width: 320px;
+            /* Adjust width to create more space */
+            max-width: 90%;
+            /* Adjust to screen size */
+            text-align: center;
+            border: 1px solid #333;
+            /* Subtle border */
+        }
+
+        #popup p {
+            margin-bottom: 15px;
+        }
+
+        #copy-btn {
+            margin-top: 15px;
+            /* Add more space above the button */
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007acc;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            display: inline-block;
+        }
+
+        #copy-btn:hover {
+            background-color: #005a9e;
+        }
+    </style>
+    <script src="https://unpkg.com/monaco-editor@latest/min/vs/loader.js"></script>
+</head>
+
+<body>
+    <div id="editor"></div>
+
+    <div id="popup">
+        <p>Click to copy your sharable secret:</p>
+        <div id="share-link-wrapper">
+            <div id="share-link">
+                https://example.com/secret/12345
+            </div>
+            <i id="copy-icon" class="far fa-copy"></i>
+        </div>
+    </div>
+
+    <script>
+        require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@latest/min/vs' } });
+        require(['vs/editor/editor.main'], function () {
+            var editor = monaco.editor.create(document.getElementById('editor'), {
+                value: `# Secret Title
+
+Write your secret below in **Markdown**.
+
+## Instructions
+
+- Press **CTRL+S** to save your secret.
+- The secret is **one-time-use**: once you generate the link, do not visit it before sharing, or it will be deleted.
+- Use **bold** text for emphasis.
+- Use *italic* text for subtle highlights.
+- Add [links](https://example.com) if needed.
+- Use \`inline code\` for short code snippets.
+- Create lists:
+  - Item 1
+  - Item 2
+  - Item 3
+
+> Keep your secrets safe and secure.
+
+\`\`\`
+# Code block
+print("This is an example of a code block.")
+\`\`\`
+`,
+                language: 'markdown',
+                theme: 'vs-dark',
+                automaticLayout: true
+            });
+
+            // Function to generate a random AES key
+            async function generateAESKey() {
+                const key = await crypto.subtle.generateKey(
+                    {
+                        name: "AES-GCM",
+                        length: 256,
+                    },
+                    true,
+                    ["encrypt", "decrypt"]
+                );
+                return key;
+            }
+
+            // Function to encrypt the secret
+            async function encryptSecret(secret, aesKey) {
+                const encoder = new TextEncoder();
+                const encodedSecret = encoder.encode(secret);
+
+                const iv = crypto.getRandomValues(new Uint8Array(12)); // 96-bit IV for AES-GCM
+                const encryptedSecret = await crypto.subtle.encrypt(
+                    {
+                        name: "AES-GCM",
+                        iv: iv,
+                    },
+                    aesKey,
+                    encodedSecret
+                );
+
+                // Convert the encrypted data and IV to a base64-encoded string
+                const ivBase64 = btoa(String.fromCharCode(...iv));
+                const ciphertextBase64 = btoa(String.fromCharCode(...new Uint8Array(encryptedSecret)));
+
+                return {
+                    iv: ivBase64,
+                    ciphertext: ciphertextBase64,
+                };
+            }
+
+            // Function to export the AES key to a string
+            async function exportAESKey(aesKey) {
+                const exportedKey = await crypto.subtle.exportKey("raw", aesKey);
+                return Array.from(new Uint8Array(exportedKey)).map(b => b.toString(16).padStart(2, '0')).join('');
+            }
+
+            // Function to handle the secret storage and link generation
+            async function storeSecretAndGetLink(encryptedSecret) {
+                // Implement your server-side storage logic here
+                // This function should return the RANDOM_SECRET_ID
+                console.log(encryptedSecret)
+
+                const resp = await fetch(`${window.location.origin}/api/secret`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(encryptedSecret),
+                })
+                const data = await resp.json()
+
+                // Placeholder to be replaced by your implementation
+                return data.secretId;
+            }
+
+            // Save function
+            async function saveSecret() {
+                const secret = editor.getValue();
+                const aesKey = await generateAESKey();
+                const encryptedData = await encryptSecret(secret, aesKey);
+                const aesKeyHex = await exportAESKey(aesKey);
+
+                // Push encrypted secret to your server and get the random secret ID
+                const randomSecretId = await storeSecretAndGetLink(encryptedData);
+
+                // Construct the shareable link
+                const shareLink = `${window.location.origin}/${randomSecretId}#${aesKeyHex}`;
+
+                // Update the popup with the shareable link
+                document.getElementById('share-link').textContent = shareLink;
+
+                // Show the popup
+                document.getElementById('popup').style.display = 'block';
+            }
+
+            // Capture CTRL+S to save the secret
+            function handleSaveKeydown(e) {
+                if (e.ctrlKey && e.key === 's') {
+                    e.preventDefault(); // Prevent the default browser save dialog
+                    saveSecret(); // Call the save function
+                    document.removeEventListener('keydown', handleSaveKeydown); // Remove the event listener after the first save
+                }
+            }
+            document.addEventListener('keydown', handleSaveKeydown);
+
+            document.getElementById('share-link-wrapper').addEventListener('click', function () {
+                const shareLink = document.getElementById('share-link').textContent.trim(); // Get the text content
+
+                // Copy the link to the clipboard
+                navigator.clipboard.writeText(shareLink).then(() => {
+                    const originalContent = document.getElementById('share-link').innerHTML;
+
+                    // Show feedback by changing the icon or text temporarily
+                    document.getElementById('share-link').innerHTML = 'Secret Copied';
+
+                    // Revert back to original after 2 seconds
+                    setTimeout(() => {
+                        document.getElementById('share-link').innerHTML = originalContent;
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Failed to copy text: ', err);
+                });
+            });
+
+        });
+    </script>
+</body>
+
+</html>
