@@ -1,5 +1,5 @@
 import dynamic from "next/dynamic";
-import React from "react";
+import React, { useRef } from "react";
 
 // Dynamically import MonacoEditor to avoid SSR issues
 const MonacoEditor = dynamic(() => import("@monaco-editor/react"), {
@@ -68,9 +68,17 @@ interface FlexokiEditorProps {
 }
 
 const FlexokiEditor: React.FC<FlexokiEditorProps> = (props) => {
+  const editorRef = useRef(null);
+
+
   const handleEditorWillMount = (monaco: any) => {
     monaco.editor.defineTheme("flexoki", flexokiTheme);
   };
+
+  const handleOnMount = (editor: any, monaco: any) => {
+    editorRef.current = editor;
+    // TODO: anything else we need for setup....
+  }
 
   return (
     <MonacoEditor

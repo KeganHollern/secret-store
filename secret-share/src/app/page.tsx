@@ -17,7 +17,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import React, { useCallback, useRef } from "react"
+import React, { useCallback } from "react"
 
 const DEFAULT_CONTENT = `# Secret Title
 
@@ -41,11 +41,9 @@ print("This is an example of a code block.")
 `
 
 export default function Page() {
-  const editorRef = useRef<any>(null)
-
   const handleSave = useCallback(() => {
     // TODO: Implement save functionality
-    console.log("Saving...", editorRef.current?.getValue())
+    
   }, [])
 
   // Handle CTRL+S
@@ -60,10 +58,6 @@ export default function Page() {
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [handleSave])
-
-  const handleEditorMount = (editor: any) => {
-    editorRef.current = editor
-  }
 
   return (
     <SidebarProvider>
@@ -90,12 +84,12 @@ export default function Page() {
         </header>
         { /* the div below will overflow as the parent container shrinks */}
         { /* i want the div below to shrink with the parent container */}
-        <div className="flex flex-1 flex-col">
+        <div className="flex shrink-0 flex-1 flex-col">
+          
+        <span>hello</span> 
           <FlexokiEditor
-            className="w-full h-full flex-shrink min-w-0 min-h-0"
             defaultLanguage="markdown"
             defaultValue={DEFAULT_CONTENT}
-            onMount={handleEditorMount}
             options={{
               minimap: { enabled: false },
               fontSize: 16,
@@ -105,7 +99,6 @@ export default function Page() {
               automaticLayout: true
             }}
           />
-        
         </div>
       </SidebarInset>
     </SidebarProvider>
