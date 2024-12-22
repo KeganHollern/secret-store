@@ -1,5 +1,7 @@
+// src/components/app-sidebar.tsx
 import MD5 from 'crypto-js/md5';
 import { Code, Home, LayoutDashboard, MessageCircleCode, Newspaper } from "lucide-react";
+import { headers } from 'next/headers';
 
 import {
   Sidebar,
@@ -15,7 +17,7 @@ import {
 
 import NavUser from "@/components/nav-user";
 
-// Menu items.
+// Menu items remain the same
 const platform_items = [
   {
     title: "Home",
@@ -49,7 +51,11 @@ const getGravatarUrl = (email: string) => {
   return `https://www.gravatar.com/avatar/${emailHash}?s=200`;
 }
 
-export function AppSidebar() {
+export async function AppSidebar() {
+  const headersList = headers();
+  const userName = headersList.get('x-user-name') || 'Anonymous';
+  const userEmail = headersList.get('x-user-email') || 'anonymous@example.com';
+
   return (
     <Sidebar>
       <SidebarContent>
@@ -73,11 +79,10 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={{
-          name: "Kegan",
-          email: "keganhollern@gmail.com",
-          avatar: getGravatarUrl("keganhollern@gmail.com"),
+          name: userName,
+          email: userEmail,
+          avatar: getGravatarUrl(userEmail),
         }} />
-        
       </SidebarFooter>
     </Sidebar>
   )

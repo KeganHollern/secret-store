@@ -64,10 +64,11 @@ const flexokiTheme = {
 };
 
 interface FlexokiEditorProps {
+  onMount?: (editor: any) => void;
   [key: string]: any; // Allow any additional props
 }
 
-const FlexokiEditor: React.FC<FlexokiEditorProps> = (props) => {
+const FlexokiEditor: React.FC<FlexokiEditorProps> = ({ onMount, ...props }) => {
   const editorRef = useRef(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -93,10 +94,14 @@ const FlexokiEditor: React.FC<FlexokiEditorProps> = (props) => {
     monaco.editor.defineTheme("flexoki", flexokiTheme);
   };
 
-  const handleOnMount = (editor: any, monaco: any) => {
+  const handleEditorDidMount = (editor: any, monaco: any) => {
     editorRef.current = editor;
     // Ensure initial layout is correct
     editor.layout();
+    // Call the passed onMount handler if it exists
+    if (onMount) {
+      onMount(editor);
+    }
   };
 
   return (
@@ -105,7 +110,7 @@ const FlexokiEditor: React.FC<FlexokiEditorProps> = (props) => {
         {...props}
         theme="flexoki"
         beforeMount={handleEditorWillMount}
-        onMount={handleOnMount}
+        onMount={handleEditorDidMount}
         className="absolute inset-0"
       />
     </div>
