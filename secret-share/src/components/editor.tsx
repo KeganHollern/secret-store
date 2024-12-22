@@ -69,7 +69,25 @@ interface FlexokiEditorProps {
 
 const FlexokiEditor: React.FC<FlexokiEditorProps> = (props) => {
   const editorRef = useRef(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
+  // Create ResizeObserver to watch container size changes
+  React.useEffect(() => {
+    if (!containerRef.current || !editorRef.current) return;
+
+    const resizeObserver = new ResizeObserver(() => {
+      if (editorRef.current) {
+        // @ts-ignore - we know editor exists
+        editorRef.current.layout();
+      }
+    });
+
+    resizeObserver.observe(containerRef.current);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
 
   const handleEditorWillMount = (monaco: any) => {
     monaco.editor.defineTheme("flexoki", flexokiTheme);
@@ -77,15 +95,20 @@ const FlexokiEditor: React.FC<FlexokiEditorProps> = (props) => {
 
   const handleOnMount = (editor: any, monaco: any) => {
     editorRef.current = editor;
-    // TODO: anything else we need for setup....
-  }
+    // Ensure initial layout is correct
+    editor.layout();
+  };
 
   return (
-    <MonacoEditor
-      {...props}
-      theme="flexoki"
-      beforeMount={handleEditorWillMount}
-    />
+    <div ref={containerRef} className="h-full w-full relative">
+      <MonacoEditor
+        {...props}
+        theme="flexoki"
+        beforeMount={handleEditorWillMount}
+        onMount={handleOnMount}
+        className="absolute inset-0"
+      />
+    </div>
   );
 };
 

@@ -1,4 +1,3 @@
-// src/app/page.tsx
 "use client"
 
 import { AppSidebar } from "@/components/app-sidebar"
@@ -43,7 +42,6 @@ print("This is an example of a code block.")
 export default function Page() {
   const handleSave = useCallback(() => {
     // TODO: Implement save functionality
-    
   }, [])
 
   // Handle CTRL+S
@@ -60,47 +58,43 @@ export default function Page() {
   }, [handleSave])
 
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      
-      <SidebarInset >
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-          <SidebarTrigger className="-ml-1"/>
-          <Separator orientation="vertical" className="mr-2 h-4" />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem className="hidden md:block">
-                <BreadcrumbLink href="#">
-                  lystic.dev
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator className="hidden md:block" />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Secret Share</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-
-        </header>
-        { /* the div below will overflow as the parent container shrinks */}
-        { /* i want the div below to shrink with the parent container */}
-        <div className="flex shrink-0 flex-1 flex-col">
-          
-        <span>hello</span> 
-          <FlexokiEditor
-            defaultLanguage="markdown"
-            defaultValue={DEFAULT_CONTENT}
-            options={{
-              minimap: { enabled: false },
-              fontSize: 16,
-              wordWrap: "on",
-              padding: { top: 16 },
-              lineNumbers: "on",
-              automaticLayout: true
-            }}
-          />
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
+    <div className="h-screen w-screen flex overflow-hidden">
+      <SidebarProvider>
+        <AppSidebar />
+        <SidebarInset className="flex flex-col min-h-0 flex-1">
+          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+            <SidebarTrigger className="-ml-1"/>
+            <Separator orientation="vertical" className="mr-2 h-4" />
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem className="hidden md:block">
+                  <BreadcrumbLink href="#">
+                    lystic.dev
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator className="hidden md:block" />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Secret Share</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </header>
+          <div className="flex-1 min-h-0">
+            <FlexokiEditor
+              defaultLanguage="markdown"
+              defaultValue={DEFAULT_CONTENT}
+              options={{
+                minimap: { enabled: false },
+                fontSize: 16,
+                wordWrap: "on",
+                padding: { top: 16 },
+                lineNumbers: "on",
+                automaticLayout: true
+              }}
+            />
+          </div>
+        </SidebarInset>
+      </SidebarProvider>
+    </div>
   )
-};
+}
