@@ -1,8 +1,8 @@
-# [Secret Share](https://secret.lystic.dev)
+# [Secret Store](https://secret.lystic.dev)
 
 ## Overview
 
-Secret Share is a secure, one-time-use secret sharing application that allows users to create and share encrypted markdown-based secrets with end-to-end encryption. The application ensures that secrets can only be viewed once before being automatically deleted.
+Secret Store is a secure, one-time-use secret sharing application that allows users to create and share encrypted markdown-based secrets with end-to-end encryption. The application ensures that secrets can only be viewed once before being automatically deleted.
 
 ## Features
 

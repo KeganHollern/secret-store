@@ -152,7 +152,7 @@ export function ClientContent() {
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>
-                <BreadcrumbPage>Secret Share</BreadcrumbPage>
+                <BreadcrumbPage>Secret Store</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>

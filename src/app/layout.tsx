@@ -7,8 +7,8 @@ import "./globals.css"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Secret Share",
-  description: "Securely share secrets with end-to-end encryption",
+  title: "Secret Store",
+  description: "Securely share secrets with end-to-end encryption.",
 }
 
 export default function RootLayout({
