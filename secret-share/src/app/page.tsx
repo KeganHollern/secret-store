@@ -1,11 +1,22 @@
 // src/app/page.tsx
 "use client"
 
+import { AppSidebar } from "@/components/app-sidebar"
 import FlexokiEditor from "@/components/editor"
-import Layout from "@/components/layout"
-import { Button } from "@/components/ui/button"
-import { useMediaQuery } from "@/hooks/use-media-query"
-import { Save } from "lucide-react"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
+import { Separator } from "@/components/ui/separator"
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar"
 import React, { useCallback, useRef } from "react"
 
 const DEFAULT_CONTENT = `# Secret Title
@@ -30,7 +41,6 @@ print("This is an example of a code block.")
 `
 
 export default function Page() {
-  const isMobile = useMediaQuery("(max-width: 768px)")
   const editorRef = useRef<any>(null)
 
   const handleSave = useCallback(() => {
@@ -56,22 +66,33 @@ export default function Page() {
   }
 
   return (
-    <Layout>
-      <div className="relative h-full">
-        {/* Mobile save button */}
-        {isMobile && (
-          <div className="absolute bottom-4 right-4 z-50">
-            <Button size="lg" onClick={handleSave}>
-              <Save className="mr-2 h-4 w-4" />
-              Save
-            </Button>
-          </div>
-        )}
+    <SidebarProvider>
+      <AppSidebar />
+      
+      <SidebarInset >
+        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+          <SidebarTrigger className="-ml-1"/>
+          <Separator orientation="vertical" className="mr-2 h-4" />
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem className="hidden md:block">
+                <BreadcrumbLink href="#">
+                  lystic.dev
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator className="hidden md:block" />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Secret Share</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
 
-        {/* Editor taking up full space */}
-        <div className="h-full">
+        </header>
+        { /* the div below will overflow as the parent container shrinks */}
+        { /* i want the div below to shrink with the parent container */}
+        <div className="flex flex-1 flex-col">
           <FlexokiEditor
-            height="100%"
+            className="w-full h-full flex-shrink min-w-0 min-h-0"
             defaultLanguage="markdown"
             defaultValue={DEFAULT_CONTENT}
             onMount={handleEditorMount}
@@ -81,10 +102,12 @@ export default function Page() {
               wordWrap: "on",
               padding: { top: 16 },
               lineNumbers: "on",
+              automaticLayout: true
             }}
           />
+        
         </div>
-      </div>
-    </Layout>
+      </SidebarInset>
+    </SidebarProvider>
   )
-}
+};
