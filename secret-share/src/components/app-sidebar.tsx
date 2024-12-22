@@ -1,57 +1,66 @@
-import { Calendar, Home, Inbox, Search, Settings } from "lucide-react"
+import MD5 from 'crypto-js/md5';
+import { Code, Home, LayoutDashboard, MessageCircleCode, Newspaper } from "lucide-react";
 
 import {
-    Sidebar,
-    SidebarContent,
-    SidebarGroup,
-    SidebarGroupContent,
-    SidebarGroupLabel,
-    SidebarMenu,
-    SidebarMenuButton,
-    SidebarMenuItem,
-} from "@/components/ui/sidebar"
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@/components/ui/sidebar";
+
+import NavUser from "@/components/nav-user";
 
 // Menu items.
-const items = [
+const platform_items = [
   {
     title: "Home",
-    url: "#",
+    url: "https://lystic.dev",
     icon: Home,
   },
   {
-    title: "Inbox",
-    url: "#",
-    icon: Inbox,
+    title: "Dashboard",
+    url: "https://dash.lystic.dev",
+    icon: LayoutDashboard,
   },
   {
-    title: "Calendar",
-    url: "#",
-    icon: Calendar,
+    title: "Blog",
+    url: "https://blog.lystic.dev",
+    icon: Newspaper,
   },
   {
-    title: "Search",
-    url: "#",
-    icon: Search,
+    title: "Chat",
+    url: "https://chat.lystic.dev",
+    icon: MessageCircleCode,
   },
   {
-    title: "Settings",
-    url: "#",
-    icon: Settings,
+    title: "Editor",
+    url: "https://rustpad.lystic.dev",
+    icon: Code,
   },
 ]
+
+const getGravatarUrl = (email: string) => {
+  const emailHash = MD5(email.trim().toLowerCase()).toString();
+  return `https://www.gravatar.com/avatar/${emailHash}?s=200`;
+}
 
 export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
+          <SidebarGroupLabel>Platform</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
+              {platform_items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <a href={item.url}>
+                    <a target='_blank' href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
                     </a>
@@ -62,6 +71,14 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter>
+        <NavUser user={{
+          name: "Kegan",
+          email: "keganhollern@gmail.com",
+          avatar: getGravatarUrl("keganhollern@gmail.com"),
+        }} />
+        
+      </SidebarFooter>
     </Sidebar>
   )
 }
