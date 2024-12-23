@@ -2,8 +2,8 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
 // Define default values
-const DEFAULT_NAME = 'Kegan'
-const DEFAULT_EMAIL = 'keganhollern@gmail.com'
+const DEFAULT_NAME = 'Anonymous'
+const DEFAULT_EMAIL = 'anonymous@lystic.dev'
 
 export function middleware(request: NextRequest) {
   const headers = new Headers(request.headers)
