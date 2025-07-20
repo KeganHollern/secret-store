@@ -25,19 +25,9 @@ const platform_items = [
     icon: Home,
   },
   {
-    title: "Dashboard",
-    url: "https://dash.lystic.dev",
-    icon: LayoutDashboard,
-  },
-  {
     title: "Blog",
     url: "https://blog.lystic.dev",
     icon: Newspaper,
-  },
-  {
-    title: "Chat",
-    url: "https://chat.lystic.dev",
-    icon: MessageCircleCode,
   },
   {
     title: "Editor",
