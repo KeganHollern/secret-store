@@ -1,12 +1,9 @@
 // src/components/app-sidebar.tsx
-import MD5 from 'crypto-js/md5';
-import { Code, Home, LayoutDashboard, MessageCircleCode, Newspaper } from "lucide-react";
-import { headers } from 'next/headers';
+import { Code, Home, Newspaper } from "lucide-react";
 
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -36,21 +33,12 @@ const platform_items = [
   },
 ]
 
-const getGravatarUrl = (email: string) => {
-  const emailHash = MD5(email.trim().toLowerCase()).toString();
-  return `https://www.gravatar.com/avatar/${emailHash}?s=200`;
-}
-
 export async function AppSidebar() {
-  const headersList = headers();
-  const userName = headersList.get('x-user-name') || 'Anonymous';
-  const userEmail = headersList.get('x-user-email') || 'anonymous@example.com';
-
   return (
     <Sidebar>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Platform</SidebarGroupLabel>
+          <SidebarGroupLabel>Lystic's Platform</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {platform_items.map((item) => (
@@ -67,13 +55,6 @@ export async function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter>
-        <NavUser user={{
-          name: userName,
-          email: userEmail,
-          avatar: getGravatarUrl(userEmail),
-        }} />
-      </SidebarFooter>
-    </Sidebar>
+    </Sidebar >
   )
 }
